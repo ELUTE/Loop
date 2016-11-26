@@ -4,10 +4,8 @@
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
-	<key>ITSAppUsesNonExemptEncryption</key>
-	<false/>
 	<key>CFBundleDisplayName</key>
-	<string>Loop</string>
+	<string>LoopCan</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -24,6 +22,8 @@
 	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>dexcomcgm</string>
@@ -41,6 +41,7 @@ Glucose data from the Health database is used for graphing and momentum calculat
 Glucose data retrieved from the CGM is stored securely in HealthKit.</string>
 	<key>UIBackgroundModes</key>
 	<array>
+		<string>bluetooth-peripheral</string>
 		<string>bluetooth-central</string>
 	</array>
 	<key>UILaunchStoryboardName</key>
