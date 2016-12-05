@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder.WatchKit.Storyboard" version="3.0" toolsVersion="11201" systemVersion="16A323" targetRuntime="watchKit" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="rNf-Mh-tID">
+<document type="com.apple.InterfaceBuilder.WatchKit.Storyboard" version="3.0" toolsVersion="11542" systemVersion="16B2555" targetRuntime="watchKit" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="rNf-Mh-tID">
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11161"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBWatchKitPlugin" version="11077"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11524"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBWatchKitPlugin" version="11508"/>
     </dependencies>
     <scenes>
         <!--AddCarbsInterfaceController-->
@@ -94,10 +94,10 @@
             </objects>
             <point key="canvasLocation" x="520" y="345"/>
         </scene>
-        <!--Loop-->
+        <!--LoopCan-->
         <scene sceneID="gQv-2Z-iCt">
             <objects>
-                <controller title="Loop" id="rNf-Mh-tID" customClass="StatusInterfaceController" customModule="WatchApp_Extension">
+                <controller title="LoopCan" id="rNf-Mh-tID" customClass="StatusInterfaceController" customModule="WatchApp_Extension">
                     <items>
                         <group width="1" alignment="left" id="1wc-65-vel">
                             <items>

@@ -19,7 +19,7 @@ import NightscoutUploadKit
 import RileyLinkKit
 import ShareClient
 import xDripG5
-
+import PebbleKit
 
 final class DeviceDataManager: CarbStoreDelegate, CarbStoreSyncDelegate, DoseStoreDelegate, TransmitterDelegate, ReceiverDelegate {
 
