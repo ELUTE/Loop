@@ -7,9 +7,7 @@
 //
 
 import Foundation
-import CarbKit
 import HealthKit
-import InsulinKit
 import LoopKit
 
 
@@ -105,19 +103,13 @@ extension InsulinCorrection {
 }
 
 
-struct TempBasalRecommendation {
+struct TempBasalRecommendation: Equatable {
     let unitsPerHour: Double
     let duration: TimeInterval
 
     /// A special command which cancels any existing temp basals
     static var cancel: TempBasalRecommendation {
         return self.init(unitsPerHour: 0, duration: 0)
-    }
-}
-
-extension TempBasalRecommendation: Equatable {
-    static func ==(lhs: TempBasalRecommendation, rhs: TempBasalRecommendation) -> Bool {
-        return lhs.unitsPerHour == rhs.unitsPerHour && lhs.duration == rhs.duration
     }
 }
 
@@ -138,12 +130,16 @@ extension TempBasalRecommendation {
     ///   - scheduledBasalRate: The scheduled basal rate at `date`
     ///   - lastTempBasal: The previously set temp basal
     ///   - continuationInterval: The duration of time before an ongoing temp basal should be continued with a new command
+    ///   - scheduledBasalRateMatchesPump: A flag describing whether `scheduledBasalRate` matches the scheduled basal rate of the pump.
+    ///                                    If `false` and the recommendation matches `scheduledBasalRate`, the temp will be recommended
+    ///                                    at the scheduled basal rate rather than recommending no temp.
     /// - Returns: A temp basal recommendation
     func ifNecessary(
         at date: Date,
         scheduledBasalRate: Double,
         lastTempBasal: DoseEntry?,
-        continuationInterval: TimeInterval
+        continuationInterval: TimeInterval,
+        scheduledBasalRateMatchesPump: Bool
     ) -> TempBasalRecommendation? {
         // Adjust behavior for the currently active temp basal
         if let lastTempBasal = lastTempBasal,
@@ -153,14 +149,14 @@ extension TempBasalRecommendation {
             /// If the last temp basal has the same rate, and has more than `continuationInterval` of time remaining, don't set a new temp
             if matchesRate(lastTempBasal.unitsPerHour),
                 lastTempBasal.endDate.timeIntervalSince(date) > continuationInterval {
-                return nil
-            } else if matchesRate(scheduledBasalRate) {
-                // If our new temp matches the scheduled rate, cancel the current temp
-                return .cancel
+                return self
+            } else if matchesRate(scheduledBasalRate), scheduledBasalRateMatchesPump {
+                // If our new temp matches the scheduled rate of the pump, cancel the current temp
+                return self
             }
-        } else if matchesRate(scheduledBasalRate) {
-            // If we recommend the in-progress scheduled basal rate, do nothing
-            return nil
+        } else if matchesRate(scheduledBasalRate), scheduledBasalRateMatchesPump {
+            // If we recommend the in-progress scheduled basal rate of the pump, do nothing
+            return self
         }
 
         return self
@@ -209,7 +205,7 @@ private func targetGlucoseValue(percentEffectDuration: Double, minValue: Double,
 }
 
 
-extension Collection where Iterator.Element == GlucoseValue {
+extension Collection where Element == GlucoseValue {
 
     /// For a collection of glucose prediction, determine the least amount of insulin delivered at
     /// `date` to correct the predicted glucose to the middle of `correctionRange` at the time of prediction.
@@ -348,6 +344,7 @@ extension Collection where Iterator.Element == GlucoseValue {
     ///   - basalRates: The schedule of basal rates
     ///   - maxBasalRate: The maximum allowed basal rate
     ///   - lastTempBasal: The previously set temp basal
+    ///   - isBasalRateScheduleOverrideActive: A flag describing whether a basal rate schedule override is in progress
     ///   - duration: The duration of the temporary basal
     ///   - minimumProgrammableIncrementPerUnit: The smallest fraction of a unit supported in basal delivery
     ///   - continuationInterval: The duration of time before an ongoing temp basal should be continued with a new command
@@ -361,6 +358,7 @@ extension Collection where Iterator.Element == GlucoseValue {
         basalRates: BasalRateSchedule,
         maxBasalRate: Double,
         lastTempBasal: DoseEntry?,
+        isBasalRateScheduleOverrideActive: Bool = false,
         duration: TimeInterval = .minutes(30),
         minimumProgrammableIncrementPerUnit: Double = 40,
         continuationInterval: TimeInterval = .minutes(11)
@@ -394,7 +392,8 @@ extension Collection where Iterator.Element == GlucoseValue {
             at: date,
             scheduledBasalRate: scheduledBasalRate,
             lastTempBasal: lastTempBasal,
-            continuationInterval: continuationInterval
+            continuationInterval: continuationInterval,
+            scheduledBasalRateMatchesPump: !isBasalRateScheduleOverrideActive
         )
     }
 
@@ -423,7 +422,7 @@ extension Collection where Iterator.Element == GlucoseValue {
         guard let correction = self.insulinCorrection(
             to: correctionRange,
             at: date,
-            suspendThreshold: suspendThreshold ?? correctionRange.minQuantity(at: date),
+            suspendThreshold: HKQuantity(unit: HKUnit.milligramsPerDeciliter, doubleValue: 55.0),
             sensitivity: sensitivity.quantity(at: date),
             model: model
         ) else {
